@@ -1,7 +1,8 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 
 class MCQuestionScreen extends StatefulWidget {
-  const MCQuestionScreen({super.key});
+  const MCQuestionScreen({Key? key}) : super(key: key);
 
   @override
   _MCQuestionScreenState createState() => _MCQuestionScreenState();
@@ -9,6 +10,7 @@ class MCQuestionScreen extends StatefulWidget {
 
 class _MCQuestionScreenState extends State<MCQuestionScreen> {
   List<String> selectedOptions = [];
+  late Timer _timer;
 
   // Lista de opciones para la pregunta
   final List<String> options = [
@@ -19,10 +21,48 @@ class _MCQuestionScreenState extends State<MCQuestionScreen> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    // Iniciar el temporizador de 30 segundos al cargar la página
+    _startTimer();
+  }
+
+  @override
+  void dispose() {
+    // Detener el temporizador al salir de la página
+    _timer.cancel();
+    super.dispose();
+  }
+
+  void _startTimer() {
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      if (timer.tick >= 30) {
+        timer.cancel();
+        if (selectedOptions.isEmpty) {
+          Navigator.of(context).pop();
+        }
+      } else {
+        setState(() {}); // Actualiza el estado para redibujar el temporizador
+      }
+    });
+  }
+
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Pregunta de Test'),
+        actions: [
+          Container(
+            padding: EdgeInsets.all(8),
+            alignment: Alignment.center,
+            child: Text(
+              '${30 - _timer.tick} segundos',
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
       ),
       body: Center(
         child: Column(

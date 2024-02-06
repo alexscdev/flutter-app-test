@@ -1,7 +1,8 @@
+import 'dart:async'; // Importar Timer
 import 'package:flutter/material.dart';
 
 class SCQuestionScreen extends StatefulWidget {
-  const SCQuestionScreen({super.key});
+  const SCQuestionScreen({Key? key}) : super(key: key);
 
   @override
   _SCQuestionScreenState createState() => _SCQuestionScreenState();
@@ -9,6 +10,9 @@ class SCQuestionScreen extends StatefulWidget {
 
 class _SCQuestionScreenState extends State<SCQuestionScreen> {
   String? selectedOption;
+  late Timer _timer;
+  late DateTime _startTime;
+  final int _timerDurationInSeconds = 30;
 
   // Lista de opciones para la pregunta
   final List<String> options = [
@@ -19,10 +23,53 @@ class _SCQuestionScreenState extends State<SCQuestionScreen> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    // Iniciar el temporizador al cargar la página
+    _startTimer();
+  }
+
+  @override
+  void dispose() {
+    // Detener el temporizador al salir de la página
+    _timer.cancel();
+    super.dispose();
+  }
+
+  void _startTimer() {
+    _startTime = DateTime.now();
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      setState(() {}); // Actualizar el estado para que se vuelva a construir el temporizador
+      if (DateTime.now().difference(_startTime).inSeconds >= _timerDurationInSeconds) {
+        _timer.cancel();
+        if (selectedOption == null) {
+          Navigator.of(context).pop();
+        }
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    // Calcular el tiempo restante
+    int remainingTimeInSeconds = _timerDurationInSeconds - DateTime.now().difference(_startTime).inSeconds;
+    if (remainingTimeInSeconds < 0) {
+      remainingTimeInSeconds = 0;
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Pregunta de Test'),
+        actions: [
+          Container(
+            padding: EdgeInsets.all(8),
+            alignment: Alignment.center,
+            child: Text(
+              '$remainingTimeInSeconds segundos',
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
       ),
       body: Center(
         child: Column(

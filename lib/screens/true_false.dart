@@ -1,7 +1,8 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 
 class VFQuestionScreen extends StatefulWidget {
-  const VFQuestionScreen({super.key});
+  const VFQuestionScreen({Key? key}) : super(key: key);
 
   @override
   _VFQuestionScreenState createState() => _VFQuestionScreenState();
@@ -9,27 +10,60 @@ class VFQuestionScreen extends StatefulWidget {
 
 class _VFQuestionScreenState extends State<VFQuestionScreen> {
   String? selectedOption;
+  late Timer _timer;
 
   // Lista de opciones para la pregunta
-  final List<String> options = [
-    'Madrid',
-    'Londres',
-    'París',
-    'Berlín',
-  ];
+  final List<String> options = ['Verdadero', 'Falso'];
+
+  @override
+  void initState() {
+    super.initState();
+    // Iniciar el temporizador de 30 segundos al cargar la página
+    _startTimer();
+  }
+
+  void _startTimer() {
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      if (timer.tick >= 30) {
+        timer.cancel();
+        if (selectedOption == null) {
+          Navigator.of(context).pop();
+        }
+      } else {
+        setState(() {}); // Actualiza el estado para redibujar el temporizador
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    // Detener el temporizador al salir de la página
+    _timer.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Pregunta de Test'),
+        actions: [
+          Container(
+            padding: EdgeInsets.all(8),
+            alignment: Alignment.center,
+            child: Text(
+              '${30 - _timer.tick} segundos',
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Text(
-              '¿Cuál es la capital de Francia?',
+              '¿Es París la capital de Francia?',
               style: TextStyle(fontSize: 20),
             ),
             SizedBox(height: 20),

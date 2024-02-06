@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:app_test/screens/single_choice.dart';
-import 'package:app_test/screens/true_false.dart';
-import 'package:app_test/screens/multiple_choice.dart';
 import 'package:flutter/services.dart';
+import 'single_choice.dart'; // Importa tus clases de preguntas aquí
+import 'multiple_choice.dart';
+import 'true_false.dart';
 
 class HomeScreen extends StatelessWidget {
-  final List<String> options = ['Test VF', 'Test SC', 'Test MC'];
+  final List<String> themes = ['Odoo', 'Flutter'];
+  String? selectedTheme;
+  int? numberOfQuestions;
 
   @override
   Widget build(BuildContext context) {
@@ -13,86 +15,72 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Home'),
         actions: [
-          Row(
-            children: [
-              IconButton(
-                icon: Icon(Icons.menu),
-                onPressed: () {
-                  final screenSize = MediaQuery.of(context).size;
-
-                  showMenu(
-                    context: context,
-                    position: RelativeRect.fromLTRB(
-                      screenSize.width - 100,
-                      kToolbarHeight,
-                      screenSize.width,
-                      kToolbarHeight + 50,
-                    ),
-                    items: <PopupMenuEntry>[
-                      ...options.map((String value) {
-                        return PopupMenuItem<String>(
-                          value: value,
-                          child: Text(value),
-                        );
-                      }).toList(),
-                    ],
-                  ).then((value) {
-                    if (value != null) {
-                      navigateToPage(context, value);
-                    }
-                  });
-                },
-              ),
-              SizedBox(width: 8), // Espacio entre los botones
-              IconButton(
-                icon: const Icon(Icons.exit_to_app),
-                onPressed: () {
-                  // Lógica para salir de la aplicación
-                  SystemNavigator.pop();
-                },
-              ),
-            ],
+          PopupMenuButton<String>(
+            icon: Icon(Icons.menu),
+            onSelected: (String value) {
+              // Handle menu item selection
+              switch (value) {
+                case 'SC':
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => SCQuestionScreen()));
+                  break;
+                case 'MC':
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => MCQuestionScreen()));
+                  break;
+                case 'VF':
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => VFQuestionScreen()));
+                  break;
+              }
+            },
+            itemBuilder: (BuildContext context) {
+              return ['SC', 'MC', 'VF'].map((String option) {
+                return PopupMenuItem<String>(
+                  value: option,
+                  child: Text(option),
+                );
+              }).toList();
+            },
           ),
         ],
       ),
-      body: const Center(
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Selecciona una opción:',
-              style: TextStyle(fontSize: 20),
+            Text('Select a theme:'),
+            DropdownButton<String>(
+              value: selectedTheme,
+              onChanged: (String? newValue) {
+                selectedTheme = newValue;
+              },
+              items: themes.map((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+            ),
+            SizedBox(height: 20),
+            Text('Enter the number of questions:'),
+            TextField(
+              keyboardType: TextInputType.number,
+              onChanged: (value) {
+                numberOfQuestions = int.tryParse(value);
+              },
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                // Handle the user selection and navigate to the test screen
+                // Here you can use selectedTheme and numberOfQuestions to generate the test
+                // For example:
+                // Navigator.push(context, MaterialPageRoute(builder: (context) => TestScreen(theme: selectedTheme, numberOfQuestions: numberOfQuestions)));
+              },
+              child: Text('Start Test'),
             ),
           ],
         ),
       ),
     );
   }
-
-  void navigateToPage(BuildContext context, String selectedOption) {
-    switch (selectedOption) {
-      case 'Test SC':
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => SCQuestionScreen()),
-        );
-        break;
-      case 'Test VF':
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => VFQuestionScreen()),
-        );
-        break;
-      case 'Test MC':
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => MCQuestionScreen()),
-        );
-        break;
-      default:
-      // Handle other cases if needed
-        break;
-    }
-  }
 }
-
