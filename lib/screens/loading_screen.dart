@@ -12,9 +12,9 @@ class LoadingScreen extends StatelessWidget {
 
   // Lista de imágenes aleatorias (puedes usar AssetImage para imágenes locales)
   static final List<String> randomImages = [
-    "https://via.placeholder.com/150", // Ejemplo de URL de imagen aleatoria
-    "https://via.placeholder.com/150",
-    "https://via.placeholder.com/150",
+    "https://picsum.photos/300", // Ejemplo de URL de imagen aleatoria
+    "https://picsum.photos/300",
+    "https://picsum.photos/300",
   ];
 
   // Texto y imagen aleatorios seleccionados una vez en la creación del widget

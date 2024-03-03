@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'single_choice.dart'; // Importa tus clases de preguntas aquí
-import 'multiple_choice.dart';
-import 'true_false.dart';
+import 'tipo_test_screen_flutter.dart';
+import 'tipo_test_screen_odoo.dart';
+import 'tipo_test_screen_java.dart';
 
 class HomeScreen extends StatelessWidget {
-  final List<String> themes = ['Odoo', 'Flutter'];
-  String? selectedTheme;
-  int? numberOfQuestions;
+  final List<String> menuOptions = ['Ajustes', 'Perfil', 'Cerrar Sesion']; // Opciones del menú
+  final List<String> buttonOptions = ['Flutter', 'Odoo', 'Java']; // Opciones para los botones
 
   @override
   Widget build(BuildContext context) {
@@ -15,72 +14,117 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Home'),
         actions: [
-          PopupMenuButton<String>(
+          IconButton(
             icon: Icon(Icons.menu),
-            onSelected: (String value) {
-              // Handle menu item selection
-              switch (value) {
-                case 'SC':
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => SCQuestionScreen()));
-                  break;
-                case 'MC':
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => MCQuestionScreen()));
-                  break;
-                case 'VF':
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => VFQuestionScreen()));
-                  break;
-              }
+            onPressed: () {
+              final screenSize = MediaQuery.of(context).size;
+
+              showMenu(
+                context: context,
+                position: RelativeRect.fromLTRB(
+                  screenSize.width - 100,
+                  kToolbarHeight,
+                  screenSize.width,
+                  kToolbarHeight + 50,
+                ),
+                items: <PopupMenuEntry>[
+                  ...menuOptions.map((String value) {
+                    return PopupMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                ],
+              ).then((value) {
+                if (value != null) {
+                  navigateToPage(context, value);
+                }
+              });
             },
-            itemBuilder: (BuildContext context) {
-              return ['SC', 'MC', 'VF'].map((String option) {
-                return PopupMenuItem<String>(
-                  value: option,
-                  child: Text(option),
-                );
-              }).toList();
+          ),
+          SizedBox(width: 8), // Espacio entre los botones
+          IconButton(
+            icon: const Icon(Icons.exit_to_app),
+            onPressed: () {
+              // Muestra un diálogo de confirmación al pulsar el botón de salir
+              showDialog(
+                context: context,
+                builder: (context) {
+                  return AlertDialog(
+                    title: Text('Salir de la aplicación'),
+                    content: Text('¿Seguro que desea salir de la aplicación?'),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          // Cierra el diálogo
+                          Navigator.of(context).pop();
+                        },
+                        child: Text('Cancelar'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          // Cierra la aplicación
+                          SystemNavigator.pop();
+                        },
+                        child: Text('Aceptar'),
+                      ),
+                    ],
+                  );
+                },
+              );
             },
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+      body: Center(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Select a theme:'),
-            DropdownButton<String>(
-              value: selectedTheme,
-              onChanged: (String? newValue) {
-                selectedTheme = newValue;
-              },
-              items: themes.map((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
+            Text(
+              'Selecciona la tematica de la que quiere realizar el test:',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 20),
+            ),
+            SizedBox(height: 20),
+            Column(
+              children: buttonOptions.map((option) {
+                return ElevatedButton(
+                  onPressed: () {
+                    navigateToPage(context, option);
+                  },
+                  child: Text(option),
                 );
               }).toList(),
-            ),
-            SizedBox(height: 20),
-            Text('Enter the number of questions:'),
-            TextField(
-              keyboardType: TextInputType.number,
-              onChanged: (value) {
-                numberOfQuestions = int.tryParse(value);
-              },
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                // Handle the user selection and navigate to the test screen
-                // Here you can use selectedTheme and numberOfQuestions to generate the test
-                // For example:
-                // Navigator.push(context, MaterialPageRoute(builder: (context) => TestScreen(theme: selectedTheme, numberOfQuestions: numberOfQuestions)));
-              },
-              child: Text('Start Test'),
             ),
           ],
         ),
       ),
     );
+  }
+
+  void navigateToPage(BuildContext context, String selectedOption) {
+    switch (selectedOption) {
+      case 'Flutter':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => TipoTestFlutter()),
+        );
+        break;
+      case 'Odoo':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => TipoTestOdoo()),
+        );
+        break;
+      case 'Java':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => TipoTestJava()),
+        );
+        break;
+      default:
+      // Handle other cases if needed
+        break;
+    }
   }
 }
